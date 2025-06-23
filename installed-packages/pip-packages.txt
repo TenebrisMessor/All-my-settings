@@ -1,0 +1,13 @@
+certifi==2025.4.26
+charset-normalizer==3.4.2
+idna==3.10
+mkl-service==2.4.0
+mkl_fft @ file:///io/mkl313/mkl_fft_1730824109137/work
+mkl_random @ file:///io/mkl313/mkl_random_1730823916628/work
+numpy @ file:///croot/numpy_and_numpy_base_1708638617955/work/dist/numpy-1.26.4-cp311-cp311-linux_x86_64.whl#sha256=5f96f274d410a1682519282ae769c877d32fdbf171aa8badec7bf5e1d3a1748a
+PyYAML==6.0.2
+requests==2.32.3
+tpqoa @ git+https://github.com/yhilpisch/tpqoa@4a79f30b7095642844ef99741d9bfcb952e394db
+ujson==5.10.0
+urllib3==2.4.0
+v20==3.0.25.0
