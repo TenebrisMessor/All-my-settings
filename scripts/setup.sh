@@ -23,8 +23,8 @@ case "$OS" in
 
   MINGW*|MSYS*|CYGWIN*)
     echo "🪟 Windows detectado"
-    powershell.exe -ExecutionPolicy Bypass -File "$ROOT_DIR/so/windows/setup-windows.ps1"
-    # (si quieres common en Windows, lo metes dentro del .ps1)
+    powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "cd '$ROOT_DIR'; & '$ROOT_DIR/so/windows/setup-windows.ps1'"
+    powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "cd '$ROOT_DIR'; & '$ROOT_DIR/global/setup-common.ps1'"    
     ;;
 
   *)
@@ -32,5 +32,4 @@ case "$OS" in
     exit 1
     ;;
 esac
-
 echo "✅ Setup finalizado."
