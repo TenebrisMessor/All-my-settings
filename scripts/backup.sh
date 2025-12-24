@@ -2,37 +2,39 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-COMMON="$ROOT_DIR/common"
-MAC="$ROOT_DIR/macos"
-LINUX="$ROOT_DIR/linux"
+
+GLOBAL="$ROOT_DIR/global"
+SO_DIR="$ROOT_DIR/so"
 README="$ROOT_DIR/README.md"
 
-mkdir -p "$COMMON/envs" "$MAC" "$LINUX"
+mkdir -p "$GLOBAL/envs" "$SO_DIR/macos" "$SO_DIR/linux" "$SO_DIR/windows"
 
 FECHA="$(date '+%Y-%m-%d')"
 STAMP="$(date '+%Y-%m-%d %H:%M:%S %Z')"
 OS="$(uname -s)"
 
-echo "🧾 Snapshot @ $STAMP" > "$COMMON/LAST_UPDATE.txt"
+echo "🧾 Snapshot @ $STAMP" > "$GLOBAL/LAST_UPDATE.txt"
 
 # ---------------- Conda + pip (sithlab only) ----------------
+DETAIL="pip + conda (sithlab)"
+
 if command -v conda &>/dev/null; then
   echo "🧪 Exportando conda env: sithlab"
-  conda env export --from-history -n sithlab > "$COMMON/envs/env-sithlab.yml"
+  conda env export --from-history -n sithlab \
+    | sed '/^prefix:/d' \
+    > "$GLOBAL/envs/env-sithlab.yml"
 
   echo "🐍 Exportando pip freeze (sithlab)"
-  conda run -n sithlab python -m pip freeze > "$COMMON/pip-packages.txt"
+  conda run -n sithlab python -m pip freeze > "$GLOBAL/pip-sithlab.txt"
 else
   echo "⚠️ conda no encontrado. (skip conda/pip snapshot)"
 fi
 
 # ---------------- Paquetes del SO ----------------
-DETAIL="pip + conda (sithlab)"
-
 if [[ "$OS" == "Darwin" ]]; then
   if command -v brew &>/dev/null; then
     echo "🍺 Dump Brewfile (macOS)"
-    brew bundle dump --force --file="$MAC/Brewfile"
+    brew bundle dump --force --file="$SO_DIR/macos/Brewfile"
     DETAIL="$DETAIL + brew"
   else
     echo "⚠️ brew no encontrado (skip Brewfile)"
@@ -41,11 +43,11 @@ if [[ "$OS" == "Darwin" ]]; then
 elif [[ "$OS" == "Linux" ]]; then
   if command -v apt &>/dev/null && command -v dpkg-query &>/dev/null; then
     echo "📦 Dump apt-packages.txt"
-    dpkg-query -f '${binary:Package}\n' -W | sort > "$LINUX/apt-packages.txt"
+    dpkg-query -f '${binary:Package}\n' -W | sort > "$SO_DIR/linux/apt-packages.txt"
     DETAIL="$DETAIL + apt"
   elif command -v pacman &>/dev/null; then
     echo "📦 Dump pacman-packages.txt"
-    pacman -Qqe | sort > "$LINUX/pacman-packages.txt"
+    pacman -Qqe | sort > "$SO_DIR/linux/pacman-packages.txt"
     DETAIL="$DETAIL + pacman"
   else
     echo "⚠️ No se detectó gestor compatible (apt/pacman)."
@@ -53,13 +55,11 @@ elif [[ "$OS" == "Linux" ]]; then
 fi
 
 # ---------------- Log en README ----------------
-# Recomendado: tener marcadores en README para no ensuciarlo infinito.
 START="<!-- BACKUP_LOG_START -->"
 END="<!-- BACKUP_LOG_END -->"
 LINE="| $FECHA | Respaldo automático | $DETAIL |"
 
 if [[ -f "$README" ]] && grep -qF "$START" "$README" && grep -qF "$END" "$README"; then
-  # Inserta LINE después del separador |---|---|---| dentro del bloque
   awk -v start="$START" -v end="$END" -v newline="$LINE" '
     BEGIN{inblock=0; inserted=0}
     $0==start {inblock=1; print; next}
@@ -75,7 +75,6 @@ if [[ -f "$README" ]] && grep -qF "$START" "$README" && grep -qF "$END" "$README
     }
   ' "$README" > "$README.tmp" && mv "$README.tmp" "$README"
 else
-  # Fallback: si no hay marcadores, lo agrega al final (como tu script original)
   echo "$LINE" >> "$README"
 fi
 

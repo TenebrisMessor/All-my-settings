@@ -1,0 +1,18 @@
+contourpy @ file:///Users/runner/miniforge3/conda-bld/contourpy_1762525493111/work
+cycler @ file:///home/conda/feedstock_root/build_artifacts/bld/rattler-build_cycler_1764466758/work
+fonttools @ file:///Users/runner/miniforge3/conda-bld/fonttools_1765632680641/work
+kiwisolver @ file:///Users/runner/miniforge3/conda-bld/bld/rattler-build_kiwisolver_1762488860/work
+matplotlib==3.10.8
+munkres==1.1.4
+numpy @ file:///Users/runner/miniforge3/conda-bld/bld/rattler-build_numpy_1766373788/work/dist/numpy-2.4.0-cp311-cp311-macosx_11_0_arm64.whl#sha256=a645572b0edab27a6432055a168bdf505bc9699db2b8296bac9138854f9925bc
+packaging @ file:///home/conda/feedstock_root/build_artifacts/bld/rattler-build_packaging_1745345660/work
+pandas @ file:///Users/runner/miniforge3/conda-bld/pandas_1764614611550/work
+pillow @ file:///Users/runner/miniforge3/conda-bld/bld/rattler-build_pillow_1764330196/work
+pyparsing @ file:///home/conda/feedstock_root/build_artifacts/bld/rattler-build_pyparsing_1766475444/work
+python-dateutil @ file:///home/conda/feedstock_root/build_artifacts/bld/rattler-build_python-dateutil_1751104122/work
+pytz @ file:///home/conda/feedstock_root/build_artifacts/pytz_1742920838005/work
+six @ file:///home/conda/feedstock_root/build_artifacts/bld/rattler-build_six_1753199211/work
+tornado @ file:///Users/runner/miniforge3/conda-bld/tornado_1765836484236/work
+tzdata @ file:///home/conda/feedstock_root/build_artifacts/python-tzdata_1765719872007/work
+unicodedata2 @ file:///Users/runner/miniforge3/conda-bld/unicodedata2_1763054903095/work
+

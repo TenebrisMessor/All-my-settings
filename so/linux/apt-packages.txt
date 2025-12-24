@@ -1754,6 +1754,7 @@ tmux						install
 tnftp						install
 toilet						install
 toilet-fonts					install
+tree						install
 tumbler:amd64					install
 tumbler-common					install
 tzdata						install
