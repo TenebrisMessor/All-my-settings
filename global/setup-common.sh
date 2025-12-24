@@ -158,26 +158,54 @@ log "⚡ Agregando shortcuts (bash/zsh): comando 'sithlab'"
 START="# >>> AHR shortcuts (managed) >>>"
 END="# <<< AHR shortcuts (managed) <<<"
 
-SHORTCUT_BLOCK="$(cat <<EOF
-$START
+SHORTCUT_TMP="$(mktemp)"
+cat > "$SHORTCUT_TMP" <<'EOF'
+# >>> AHR shortcuts (managed) >>>
 # Carga conda en shells interactivos y crea comando "sithlab"
-case \$- in
+case $- in
   *i*)
     if command -v conda >/dev/null 2>&1; then
-      CONDA_BASE="\$(conda info --base 2>/dev/null)"
-      if [ -n "\$CONDA_BASE" ] && [ -f "\$CONDA_BASE/etc/profile.d/conda.sh" ]; then
-        source "\$CONDA_BASE/etc/profile.d/conda.sh"
+      CONDA_BASE="$(conda info --base 2>/dev/null)"
+      if [ -n "$CONDA_BASE" ] && [ -f "$CONDA_BASE/etc/profile.d/conda.sh" ]; then
+        # shellcheck disable=SC1091
+        source "$CONDA_BASE/etc/profile.d/conda.sh"
       fi
       sithlab() { conda activate sithlab; }
     fi
   ;;
 esac
-$END
+# <<< AHR shortcuts (managed) <<<
 EOF
-)"
 
-apply_block "$HOME/.zshrc" "$START" "$END" "$SHORTCUT_BLOCK"
-apply_block "$HOME/.bashrc" "$START" "$END" "$SHORTCUT_BLOCK"
+apply_shortcuts_file() {
+  local file="$1"
+  touch "$file"
 
-log "✅ Common setup terminado."
-log "👉 Abre una NUEVA terminal y escribe: sithlab"
+  python3 - "$file" "$START" "$END" "$SHORTCUT_TMP" <<'PY'
+import sys, pathlib, re
+
+file, start, end, block_path = sys.argv[1:]
+p = pathlib.Path(file)
+text = p.read_text() if p.exists() else ""
+block = pathlib.Path(block_path).read_text().strip("\n")
+
+if start in text and end in text:
+    pattern = re.compile(re.escape(start) + r".*?" + re.escape(end), re.S)
+    text = pattern.sub(block, text, count=1)
+else:
+    if text and not text.endswith("\n"):
+        text += "\n"
+    text += "\n" + block + "\n"
+
+p.write_text(text)
+PY
+}
+
+apply_shortcuts_file "$HOME/.zshrc"
+apply_shortcuts_file "$HOME/.bashrc"
+apply_shortcuts_file "$HOME/.bash_profile"
+
+rm -f "$SHORTCUT_TMP"
+
+log "✅ Shortcuts listos."
+log "👉 Abre NUEVA terminal (o corre: source ~/.zshrc) y escribe: sithlab"
