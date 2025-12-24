@@ -7,17 +7,30 @@ Este repositorio contiene la configuración de mi entorno de desarrollo en difer
 
 ```mermaid
 flowchart TD
-  A[setup.sh] --> B{Detecta SO}
-  B -->|macOS| C[macos/setup-macos.sh]
-  B -->|Linux| D[linux/setup-linux.sh]
-  B -->|Windows| E[windows/setup-windows.ps1]
-  C --> F[common/setup-common.sh]
-  D --> F
-  E --> G[common block en PowerShell]
-  F --> H[Conda env: sithlab]
-  F --> I[pip install libs]
-  F --> J[Deploy NVIM config]
+  A([Inicio]) --> B[setup.sh]
+  B --> C{Detectar SO}
+  C -->|macOS| D[macos/setup-macos.sh]
+  C -->|Linux| E[linux/setup-linux.sh]
+  C -->|Windows| F[windows/setup-windows.ps1]
 
+  D --> G[common/setup-common.sh]
+  E --> G
+  F --> H[Common block (PowerShell)]
+
+  subgraph COMMON["Common setup (global)"]
+    G --> I[Instalar/Configurar Conda (si aplica)]
+    I --> J[Crear/Actualizar env: sithlab]
+    J --> K[Instalar librerías (pip-sithlab.txt)]
+    K --> L[Deploy config NVIM (common/nvim → ~/.config/nvim)]
+    L --> M([Listo ✅])
+  end
+
+  subgraph COMMON_WIN["Common setup (Windows)"]
+    H --> J2[Crear/Actualizar env: sithlab]
+    J2 --> K2[Instalar librerías (pip-sithlab.txt)]
+    K2 --> L2[Deploy NVIM (%LOCALAPPDATA%\\nvim)]
+    L2 --> M2([Listo ✅])
+  end
 ---
 ## 📁 Estructura del Repositorio
 <!-- BACKUP_LOG_START -->
