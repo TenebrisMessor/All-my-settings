@@ -31,6 +31,7 @@ flowchart TD
     K2 --> L2[Deploy NVIM (%LOCALAPPDATA%\\nvim)]
     L2 --> M2([Listo ✅])
   end
+```
 ---
 ## 📁 Estructura del Repositorio
 <!-- BACKUP_LOG_START -->
