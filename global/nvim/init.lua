@@ -1,90 +1,127 @@
--- Packer plugins
-require('packer').startup(function(use)
-  use 'wbthomason/packer.nvim' -- Packer en sí
-  use 'nvim-lualine/lualine.nvim' -- barra de estado pro
-  use 'kyazdani42/nvim-tree.lua' -- explorador de archivos
-  use 'nvim-telescope/telescope.nvim' -- buscador tipo VSCode
-  use 'neovim/nvim-lspconfig' -- soporte para lenguajes
-  use 'hrsh7th/nvim-cmp' -- autocompletado
-  use 'hrsh7th/cmp-nvim-lsp' --Fuente LSP para cmp
-  use 'folke/tokyonight.nvim' --Tema
-  use 'nvim-tree/nvim-web-devicons' --Iconos bonitos
-  use 'goolord/alpha-nvim' -- Dashboard de bienvenida
-  use 'nvim-lua/plenary.nvim' -- Requisito para alpha
-  -- Treesitter para resaltar código
-  use {'nvim-treesitter/nvim-treesitter', run = ':TSUpdate'} --Resaltado de sintaxis moderno
-  use 'voldikss/vim-floaterm' -- Terminal flotante
-  use({ 'iamcco/markdown-preview.nvim', run = 'cd app && npm install', ft = { 'markdown' } }) --Preview Markdown
-  -- Plugins estilo VS Code
-  use 'nvim-lua/plenary.nvim'                         -- Requisito para telescope
-  use 'williamboman/mason.nvim'                       -- Instalador de servidores LSP
-  use 'williamboman/mason-lspconfig.nvim'             -- Bridge entre mason y lspconfig
-  use 'L3MON4D3/LuaSnip'                              -- Snippets
-  use 'saadparwaiz1/cmp_luasnip'                      -- Fuente de snippets para cmp
-  use 'glepnir/dashboard-nvim'                        -- Dashboard tipo VS Code
-  use 'akinsho/bufferline.nvim'                       -- Barra de pestañas estilo VSCode
-  use 'lewis6991/gitsigns.nvim'                       -- Indicadores Git al costado
-  use 'lukas-reineke/indent-blankline.nvim'           -- Guías de indentación
-  use 'windwp/nvim-autopairs'                         -- Cierre automático de paréntesis
+-- =========================
+-- 1) BOOTSTRAP PACKER
+-- =========================
+local fn = vim.fn
+local install_path = fn.stdpath("data") .. "/site/pack/packer/start/packer.nvim"
+
+if fn.empty(fn.glob(install_path)) > 0 then
+  fn.system({ "git", "clone", "--depth", "1", "https://github.com/wbthomason/packer.nvim", install_path })
+  vim.cmd("packadd packer.nvim")
+end
+
+local ok_packer, packer = pcall(require, "packer")
+if not ok_packer then
+  return
+end
+
+packer.startup(function(use)
+  use "wbthomason/packer.nvim"
+
+  -- Core deps
+  use "nvim-lua/plenary.nvim"
+  use "nvim-tree/nvim-web-devicons"
+
+  -- UI
+  use "folke/tokyonight.nvim"
+  use { "nvim-lualine/lualine.nvim", requires = { "nvim-tree/nvim-web-devicons" } }
+  use { "nvim-tree/nvim-tree.lua", requires = { "nvim-tree/nvim-web-devicons" } }
+  use { "goolord/alpha-nvim", requires = { "nvim-tree/nvim-web-devicons" } }
+  use "akinsho/bufferline.nvim"
+  use "lukas-reineke/indent-blankline.nvim"
+  use "lewis6991/gitsigns.nvim"
+
+  -- Dev UX
+  use "voldikss/vim-floaterm"
+  use { "windwp/nvim-autopairs" }
+
+  -- LSP / tooling
+  use "neovim/nvim-lspconfig"
+  use "williamboman/mason.nvim"
+  use "williamboman/mason-lspconfig.nvim"
+
+  -- Autocomplete / snippets
+  use "hrsh7th/nvim-cmp"
+  use "hrsh7th/cmp-nvim-lsp"
+  use "L3MON4D3/LuaSnip"
+  use "saadparwaiz1/cmp_luasnip"
+
+  -- Telescope
+  use { "nvim-telescope/telescope.nvim", requires = { "nvim-lua/plenary.nvim" } }
+
+  -- Treesitter
+  use { "nvim-treesitter/nvim-treesitter", run = ":TSUpdate" }
+
+  -- Markdown Preview
+  use({ "iamcco/markdown-preview.nvim", run = "cd app && npm install", ft = { "markdown" } })
 end)
 
--- Configuración general
+-- =========================
+-- 2) SETTINGS
+-- =========================
 vim.o.number = true
 vim.o.relativenumber = true
 vim.o.tabstop = 2
 vim.o.shiftwidth = 2
 vim.o.expandtab = true
-vim.g.mapleader = ' '
--- Lualine
-require('lualine').setup()
+vim.g.mapleader = " "
+
+-- =========================
+-- 3) THEME (safe)
+-- =========================
+local ok_tokyo, tokyonight = pcall(require, "tokyonight")
+if ok_tokyo then
+  tokyonight.setup({
+    style = "night",
+    on_highlights = function(hl, c)
+      hl.Comment  = { fg = "#00FF00" }
+      hl.String   = { fg = "#FF5555" }
+      hl.Keyword  = { fg = "#FF0000" }
+      hl.Function = { fg = "#00FF00" }
+    end,
+  })
+  vim.cmd("colorscheme tokyonight-night")
+end
+
+-- =========================
+-- 4) PLUGIN CONFIG (safe requires)
+-- =========================
+local ok_lualine, lualine = pcall(require, "lualine")
+if ok_lualine then lualine.setup() end
+
+local ok_dev, devicons = pcall(require, "nvim-web-devicons")
+if ok_dev then devicons.setup() end
 
 -- NvimTree
-vim.keymap.set('n', '<leader>e', ':NvimTreeToggle<CR>')
+vim.keymap.set("n", "<leader>e", ":NvimTreeToggle<CR>", { silent = true })
 
 -- Telescope
-  vim.keymap.set('n', '<leader>f', ':Telescope find_files<CR>')
+vim.keymap.set("n", "<leader>f", ":Telescope find_files<CR>", { silent = true })
 
+-- Floaterm
+vim.g.floaterm_keymap_toggle = "<leader>t"
+vim.g.floaterm_position = "bottom"
+vim.g.floaterm_height = 0.3
 
--- Terminal flotante (Sith Toggle)
-vim.g.floaterm_keymap_toggle = '<leader>t'  -- Abrir/cerrar con SPC + t
-vim.g.floaterm_position = 'bottom'          -- Posición inferior
-vim.g.floaterm_height = 0.3                 -- 30% de la pantalla
-
--- Salir con Esc desde la terminal
 vim.cmd([[
   tnoremap <Esc> <C-\><C-n>:FloatermToggle<CR>
 ]])
--- Iconos
-require('nvim-web-devicons').setup()
 
--- Tema Sith
-vim.cmd[[colorscheme tokyonight-night]]
+-- Alpha dashboard (safe)
+local ok_alpha, alpha = pcall(require, "alpha")
+if ok_alpha then
+  local dashboard = require("alpha.themes.dashboard")
+  dashboard.section.header.val = {
+    " █████╗ ██╗  ██╗██████╗ ",
+    "██╔══██╗██║  ██║██╔══██╗",
+    "███████║███████║██████╔╝",
+    "██╔══██║██╔══██║██╔═██║ ",
+    "██║  ██║██║  ██║██║ ██║ ",
+    "╚═╝  ╚═╝╚═╝  ╚═╝╚═╝ ╚═╝ ",
+    "   WELCOME TO SITH LAB   ",
+  }
+  dashboard.section.footer.val = "Tecnología, Fuerza y Precisión. Que el código te guíe."
+  alpha.setup(dashboard.config)
+end
 
--- Dashboard personalizado
-local alpha = require("alpha")
-local dashboard = require("alpha.themes.dashboard")
-dashboard.section.header.val = {
-  " █████╗ ██╗  ██╗██████╗ ",
-  "██╔══██╗██║  ██║██╔══██╗",
-  "███████║███████║██████╔╝",
-  "██╔══██║██╔══██║██╔═██║ ",
-  "██║  ██║██║  ██║██║ ██║ ",
-  "╚═╝  ╚═╝╚═╝  ╚═╝╚═╝ ╚═╝ ",
-  "   WELCOME TO SITH LAB   ",
-}
-dashboard.section.footer.val = "Tecnología, Fuerza y Precisión. Que el código te guíe."
-alpha.setup(dashboard.config)
-
-require("tokyonight").setup({
-  style = "night", -- o "storm" si quieres más contraste
-  on_colors = function(colors)
-    colors.comment = "#00FF00"  -- Verde neó
-    colors.string = "#FF5555"   -- Rojo suave
-    colors.keyword = "#FF0000"  -- Rojo fuerte
-    colors.functionStyle = { fg = "#00FF00" }
-  end,
-})
-vim.cmd[[colorscheme tokyonight-night]]
-vim.cmd([[
-  let g:mkdp_auto_start = 1
-]])
+-- Markdown preview
+vim.g.mkdp_auto_start = 1
