@@ -117,4 +117,61 @@ else
   printf "\n%s\n" "$AUTOFETCH_BLOCK" >> "$ZSHRC"
 fi
 
+# ---------- Paths ----------
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+COMMON_DIR="$ROOT_DIR/common"
+
+# ---------- Deploy NVIM config ----------
+echo "🧠 Desplegando config de Neovim..."
+mkdir -p "$HOME/.config"
+
+if [ -e "$HOME/.config/nvim" ] && [ ! -L "$HOME/.config/nvim" ]; then
+  TS="$(date +%Y%m%d-%H%M%S)"
+  echo "📦 Backup: ~/.config/nvim -> ~/.config/nvim.backup-$TS"
+  mv "$HOME/.config/nvim" "$HOME/.config/nvim.backup-$TS"
+fi
+
+ln -sfn "$COMMON_DIR/nvim" "$HOME/.config/nvim"
+
+# ---------- Conda envs from folder ----------
+if command -v conda &>/dev/null; then
+  echo "🧪 Conda encontrado: $(conda --version)"
+
+  CONDA_BASE="$(conda info --base)"
+  # shellcheck disable=SC1091
+  source "$CONDA_BASE/etc/profile.d/conda.sh"
+
+  echo "🧱 Creando/actualizando envs desde common/envs/..."
+
+  shopt -s nullglob
+  for ENV_PATH in "$COMMON_DIR/envs/"*.yml "$COMMON_DIR/envs/"*.yaml; do
+    ENV_FILE="$(basename "$ENV_PATH")"
+
+    # Convención: env-base.yml -> dev, env-sithlab.yml -> sithlab, etc.
+    TARGET_ENV="${ENV_FILE#env-}"
+    TARGET_ENV="${TARGET_ENV%.yml}"
+    TARGET_ENV="${TARGET_ENV%.yaml}"
+    [ "$TARGET_ENV" = "base" ] && TARGET_ENV="dev"
+
+    echo "➡️ $ENV_FILE  => env: $TARGET_ENV"
+
+    if conda env list | awk '{print $1}' | grep -qx "$TARGET_ENV"; then
+      conda env update -n "$TARGET_ENV" -f "$ENV_PATH"
+    else
+      conda env create -n "$TARGET_ENV" -f "$ENV_PATH"
+    fi
+  done
+  shopt -u nullglob
+
+  # ---------- pip packages from txt (inside env dev) ----------
+  if [ -f "$COMMON_DIR/pip-packages.txt" ]; then
+    echo "📌 pip-packages.txt -> conda env: dev"
+    conda run -n dev python -m pip install --upgrade pip
+    conda run -n dev python -m pip install -r "$COMMON_DIR/pip-packages.txt"
+  fi
+
+else
+  echo "⚠️ conda no encontrado. Instala Miniconda/Anaconda/Miniforge y re-corre."
+fi
+
 echo "✅ MacOS listo."

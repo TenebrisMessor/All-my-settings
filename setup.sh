@@ -16,7 +16,7 @@ case "$OS" in
 
   MINGW* | MSYS* | CYGWIN*)
     echo "🪟 Windows detectado"
-    powershell.exe -File windows/setup-windows.ps1
+    powershell.exe -ExecutionPolicy Bypass -File windows/setup-windows.ps1
     ;;
 
   *)
